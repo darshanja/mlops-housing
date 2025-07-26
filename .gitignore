@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+mlruns/
+logs/
+models/
+data/housing.csv
