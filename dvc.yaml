@@ -1,0 +1,10 @@
+stages:
+  train_model:
+    cmd: python src/train.py
+    deps:
+      - data/housing.csv
+      - src/train.py
+    params:
+      - model.max_depth
+    outs:
+      - models/best_model.pkl
