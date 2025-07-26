@@ -4,4 +4,3 @@ __pycache__/
 venv/
 mlruns/
 logs/
-models/
