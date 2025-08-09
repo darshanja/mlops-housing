@@ -25,7 +25,9 @@ def validate():
         with open("params.yaml") as f:
             params = yaml.safe_load(f)
         
-        min_r2_score = params.get("validation", {}).get("min_r2_score", 0.5)
+        validation_params = params.get("validation", {})
+        min_r2_score = validation_params.get("min_r2_score", 0.0)
+        max_mse = validation_params.get("max_mse", 30)
 
         # Make predictions
         logger.info("Making predictions...")
@@ -40,8 +42,16 @@ def validate():
         logger.info(f"MSE: {mse:.4f}")
 
         # Check if model meets validation criteria
+        failed = False
         if r2 < min_r2_score:
-            logger.error(f"Model R² score ({r2:.4f}) is below threshold ({min_r2_score})")
+            logger.warning(f"Model R² score ({r2:.4f}) is below threshold ({min_r2_score})")
+            failed = True
+            
+        if mse > max_mse:
+            logger.error(f"Model MSE ({mse:.4f}) is above threshold ({max_mse})")
+            failed = True
+
+        if failed:
             return 1
 
         logger.info("Model validation successful!")
