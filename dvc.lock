@@ -17,15 +17,15 @@ stages:
     outs:
     - path: models/best_model.pkl
       hash: md5
-      md5: 8c46e2aeda0c52d3f3511d1c4bb7df6f
+      md5: 25cd3156a29d91e059a226ccedbbfdd4
       size: 1985
   prepare_data:
-    cmd: python src/prepare_data.py
+    cmd: python -u src/prepare_data.py
     deps:
     - path: src/prepare_data.py
       hash: md5
-      md5: 0d9a7d6d61d800f7c29d8eec51eaba50
-      size: 507
+      md5: ce61c8dcad51116825d220a4d45e18a8
+      size: 1345
     - path: tests/test_data/test_housing.csv
       hash: md5
       md5: 2d21a33feaf229f6ab28808427cccd64
