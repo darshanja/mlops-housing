@@ -17,7 +17,7 @@ stages:
     outs:
     - path: models/best_model.pkl
       hash: md5
-      md5: 55975d1d4e209c80675631675648e8ab
+      md5: 8c46e2aeda0c52d3f3511d1c4bb7df6f
       size: 1985
   prepare_data:
     cmd: python src/prepare_data.py
