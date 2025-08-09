@@ -1,4 +1,13 @@
 stages:
+  prepare_data:
+    cmd: |
+      mkdir -p data
+      cp tests/test_data/test_housing.csv data/housing.csv
+    deps:
+      - tests/test_data/test_housing.csv
+    outs:
+      - data/housing.csv
+
   train_model:
     cmd: python src/train.py
     deps:
