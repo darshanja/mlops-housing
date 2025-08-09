@@ -44,19 +44,32 @@ jobs:
 
       - name: Setup DVC
         run: |
-          rm -rf .dvc data/housing.csv
+          # Clean up any existing DVC setup and tracked files
+          rm -rf .dvc data/housing.csv data/housing.csv.dvc
+          # Initialize DVC without git
           dvc init --no-scm
           dvc config core.no_scm true
           dvc config core.analytics false
-          dvc config core.autostage true
+          # Configure for Linux environment
+          dvc config cache.type hardlink,symlink
+          dvc config cache.protected true
           
       - name: Run DVC Pipeline
         run: |
-          # Ensure directories exist
+          # Ensure clean workspace
           mkdir -p data
-          # Run DVC pipeline with clean state
-          dvc repro -v --force --no-commit
-          # Check DVC status
+          # Ensure test data exists
+          if [ ! -f "tests/test_data/test_housing.csv" ]; then
+            echo "Error: Test data file not found"
+            exit 1
+          fi
+          # Run pipeline with Linux-specific settings
+          PYTHONUNBUFFERED=1 dvc repro -v -f
+          # Verify outputs
+          if [ ! -f "data/housing.csv" ]; then
+            echo "Error: Pipeline failed to produce output file"
+            exit 1
+          fi
           dvc status
 
       - name: Validate Model

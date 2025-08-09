@@ -1,1 +1,3 @@
+# DVC managed data files
 /housing.csv
+/housing.csv.dvc
