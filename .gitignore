@@ -4,5 +4,7 @@ __pycache__/
 venv/
 mlruns/
 logs/
-# models/
-# data/housing.csv
+/models/
+/data/housing.csv
+.coverage
+*.dvc

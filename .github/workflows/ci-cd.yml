@@ -2,6 +2,8 @@ name: CI/CD Pipeline
 
 on:
   push:
+    branches: [ main, 'featre/**' ]
+  pull_request:
     branches: [ main ]
 
 jobs:
@@ -16,16 +18,82 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Cache Python Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install Dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run Training
-        run: python src/train.py
-
-      - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/housing-api .
-
-      - name: Push Docker Image
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-          docker push ${{ secrets.DOCKER_USERNAME }}/housing-api
+          python -m pip install --upgrade pip
+          python -m pip install pytest pytest-cov
+          python -m pip install -r requirements.txt
+          python -m pip install dvc[all] mlflow
+
+      - name: Run Tests
+        run: |
+          PYTHONPATH=$PYTHONPATH:$(pwd) pytest tests/ --cov=src --cov-report=term-missing -v
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Setup DVC
+        run: |
+          # Clean up any existing DVC setup and tracked files
+          rm -rf .dvc data/housing.csv data/housing.csv.dvc
+          # Initialize DVC without git
+          dvc init --no-scm
+          dvc config core.no_scm true
+          dvc config core.analytics false
+          # Configure for Linux environment
+          dvc config cache.type hardlink,symlink
+          dvc config cache.protected true
+          
+      - name: Run DVC Pipeline
+        run: |
+          # Ensure clean workspace
+          mkdir -p data
+          # Ensure test data exists
+          if [ ! -f "tests/test_data/test_housing.csv" ]; then
+            echo "Error: Test data file not found"
+            exit 1
+          fi
+          # Run pipeline with Linux-specific settings
+          PYTHONUNBUFFERED=1 dvc repro -v -f
+          # Verify outputs
+          if [ ! -f "data/housing.csv" ]; then
+            echo "Error: Pipeline failed to produce output file"
+            exit 1
+          fi
+          dvc status
+
+      - name: Validate Model
+        run: |
+          python src/validate.py
+
+      - name: Upload Model Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: models/best_model.pkl
+          retention-days: 5
+
+      - name: Build and Push Docker Image
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          if [[ -n "$DOCKER_USERNAME" && -n "$DOCKER_PASSWORD" ]]; then
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker build -t "$DOCKER_USERNAME/housing-api:latest" .
+            docker push "$DOCKER_USERNAME/housing-api:latest"
+            docker logout
+          else
+            echo "Skipping Docker push - credentials not configured"
+          fi
