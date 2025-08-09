@@ -17,13 +17,14 @@ stages:
     outs:
     - path: models/best_model.pkl
       hash: md5
-      md5: 5073486c70cf5aeb466bcf32b821988d
+      md5: ddc27b71f6c5c9c734e4e15b223b2eed
       size: 1985
   prepare_data:
     cmd: python -c "import shutil; import os; import pathlib; 
       data_dir=pathlib.Path('data'); data_dir.mkdir(exist_ok=True); 
-      shutil.copy(str(pathlib.Path('tests/test_data/test_housing.csv')), 
-      str(data_dir/'housing.csv'))"
+      src=pathlib.Path('tests/test_data/test_housing.csv'); 
+      dst=data_dir/'housing.csv'; print(f'Copying {src} to {dst}'); 
+      shutil.copy(str(src), str(dst))"
     deps:
     - path: tests/test_data/test_housing.csv
       hash: md5
