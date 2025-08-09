@@ -9,10 +9,7 @@ stages:
           cache: true
           persist: true
     frozen: false
-    always_changed: false:
-          cache: true
-          persist: true
-          checkpoint: false
+    always_changed: false
 
   train_model:
     cmd: python src/train.py
