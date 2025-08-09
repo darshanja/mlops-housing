@@ -6,3 +6,4 @@ mlruns/
 logs/
 # models/
 # data/housing.csv
+.coverage

@@ -41,15 +41,19 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      - name: Initialize DVC
+      - name: Setup DVC
         run: |
+          rm -rf .dvc
           dvc init --no-scm
           dvc config core.no_scm true
           dvc config core.analytics false
           
       - name: Run DVC Pipeline
         run: |
+          # Ensure data directory exists
+          mkdir -p data
           # Copy test data and train model
+          cp tests/test_data/test_housing.csv data/housing.csv
           dvc repro -v
 
       - name: Validate Model
