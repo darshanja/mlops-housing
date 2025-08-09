@@ -13,4 +13,5 @@ def test_data_format():
         assert col in df.columns, f"Required column {col} not found in dataset"
     
 def test_training_runs():
-    assert train() == 0, "Training failed"
+    result = train()
+    assert result == 0, f"Training failed with return code {result}"
