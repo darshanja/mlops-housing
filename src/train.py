@@ -36,7 +36,7 @@ def train():
         logger.info("Loading hyperparameters...")
         with open("params.yaml") as f:
             params = yaml.safe_load(f)
-        depth = params["model"]["max_depth"]
+        depth = int(params["model"]["max_depth"])
 
         # Setup MLflow
         logger.info("Setting up MLflow...")
@@ -45,7 +45,7 @@ def train():
 
         best_model = None
         best_score = float("inf")
-        acceptable_mse_threshold = params.get("training", {}).get("max_mse", 1e6)
+        acceptable_mse_threshold = float(params.get("training", {}).get("max_mse", "1e6"))
 
         models = {
             "LinearRegression": LinearRegression(),
