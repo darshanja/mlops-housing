@@ -50,11 +50,8 @@ jobs:
           
       - name: Run DVC Pipeline
         run: |
-          # Ensure data directory exists
-          mkdir -p data
-          # Copy test data and train model
-          cp tests/test_data/test_housing.csv data/housing.csv
-          dvc repro -v
+          # Run DVC pipeline with force to ensure clean state
+          dvc repro -v --force
 
       - name: Validate Model
         run: |

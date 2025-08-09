@@ -5,8 +5,8 @@ stages:
     deps:
     - path: data/housing.csv
       hash: md5
-      md5: f6cbb34203e4700c3518f6c067e8cc15
-      size: 1915789
+      md5: 2d21a33feaf229f6ab28808427cccd64
+      size: 555
     - path: src/train.py
       hash: md5
       md5: e2643229cd91e5c349db739d600a2022
@@ -17,5 +17,20 @@ stages:
     outs:
     - path: models/best_model.pkl
       hash: md5
-      md5: 5739d6f9f6ce1ac7b99624a01d31e279
-      size: 6017
+      md5: 5073486c70cf5aeb466bcf32b821988d
+      size: 1985
+  prepare_data:
+    cmd: python -c "import shutil; import os; import pathlib; 
+      data_dir=pathlib.Path('data'); data_dir.mkdir(exist_ok=True); 
+      shutil.copy(str(pathlib.Path('tests/test_data/test_housing.csv')), 
+      str(data_dir/'housing.csv'))"
+    deps:
+    - path: tests/test_data/test_housing.csv
+      hash: md5
+      md5: 2d21a33feaf229f6ab28808427cccd64
+      size: 555
+    outs:
+    - path: data/housing.csv
+      hash: md5
+      md5: 2d21a33feaf229f6ab28808427cccd64
+      size: 555
