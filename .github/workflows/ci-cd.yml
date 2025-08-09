@@ -17,20 +17,47 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Cache Python Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install Dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-          pip install dvc[all] mlflow
+          python -m pip install --upgrade pip
+          python -m pip install pytest pytest-cov
+          python -m pip install -r requirements.txt
+          python -m pip install dvc[all] mlflow
 
-      - name: Run DVC Pipeline
+      - name: Run Tests
         run: |
-          dvc pull
+          pytest tests/ --cov=src --cov-report=term-missing
+
+      - name: DVC Pipeline
+        run: |
           dvc repro
+
+      - name: Validate Model
+        run: |
+          python src/validate.py
+
+      - name: Upload Model Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: trained-model
+          path: models/best_model.pkl
+          retention-days: 5
 
       - name: Build and Push Docker Image
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
           docker build -t ${{ secrets.DOCKER_USERNAME }}/housing-api:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/housing-api:latest
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker logout
