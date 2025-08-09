@@ -1,12 +1,11 @@
 stages:
   prepare_data:
-    cmd: python -c "import shutil; import os; import pathlib; data_dir=pathlib.Path('data'); data_dir.mkdir(exist_ok=True); src=pathlib.Path('tests/test_data/test_housing.csv'); dst=data_dir/'housing.csv'; print(f'Copying {src} to {dst}'); shutil.copy(str(src), str(dst))"
+    cmd: python src/prepare_data.py
     deps:
+      - src/prepare_data.py
       - tests/test_data/test_housing.csv
     outs:
-      - data/housing.csv:
-          cache: true
-          persist: false
+      - data/housing.csv
 
   train_model:
     cmd: python src/train.py
