@@ -1,11 +1,15 @@
 stages:
   prepare_data:
-    cmd: python src/prepare_data.py
+    cmd: python -u src/prepare_data.py
     deps:
       - src/prepare_data.py
       - tests/test_data/test_housing.csv
     outs:
       - data/housing.csv:
+          cache: true
+          persist: true
+    frozen: false
+    always_changed: false:
           cache: true
           persist: true
           checkpoint: false
