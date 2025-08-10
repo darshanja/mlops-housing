@@ -5,6 +5,6 @@ global:
 scrape_configs:
   - job_name: 'housing-api'
     static_configs:
-      - targets: ['housing-api:8000']  # FastAPI metrics endpoint
+      - targets: ['api:8000']  # FastAPI metrics endpoint
     metrics_path: '/metrics'
     scrape_interval: 5s
