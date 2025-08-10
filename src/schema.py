@@ -7,68 +7,70 @@ import numpy as np
 
 class HousingData(BaseModel):
     """Schema for validating housing data inputs."""
-    CRIM: float = Field(..., description="Per capita crime rate by town")
-    ZN: float = Field(..., description="Proportion of residential land zoned for large lots")
-    INDUS: float = Field(..., description="Proportion of non-retail business acres per town")
-    CHAS: float = Field(..., description="Charles River dummy variable (1 if tract bounds river; 0 otherwise)")
-    NOX: float = Field(..., description="Nitric oxides concentration (parts per 10 million)")
-    RM: float = Field(..., description="Average number of rooms per dwelling")
-    AGE: float = Field(..., description="Proportion of owner-occupied units built prior to 1940")
-    DIS: float = Field(..., description="Weighted distances to employment centers")
-    RAD: float = Field(..., description="Index of accessibility to radial highways")
-    TAX: float = Field(..., description="Full-value property-tax rate per $10,000")
-    PTRATIO: float = Field(..., description="Pupil-teacher ratio by town")
-    B: float = Field(..., description="1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town")
-    LSTAT: float = Field(..., description="% lower status of the population")
-    Price: Optional[float] = Field(None, description="Median value of owner-occupied homes in $1000's")
+    MedInc: float = Field(..., description="Median income in block group")
+    HouseAge: float = Field(..., description="Median house age in block group")
+    AveRooms: float = Field(..., description="Average number of rooms per household")
+    AveBedrms: float = Field(..., description="Average number of bedrooms per household")
+    Population: float = Field(..., description="Block group population")
+    AveOccup: float = Field(..., description="Average number of household members")
+    Latitude: float = Field(..., description="Block group latitude")
+    Longitude: float = Field(..., description="Block group longitude")
+    Price: Optional[float] = Field(None, description="Median house value in block group")
 
-    @validator('CRIM')
-    def validate_crime_rate(cls, v):
+    @validator('MedInc')
+    def validate_income(cls, v):
         if v < 0:
-            raise ValueError("Crime rate cannot be negative")
+            raise ValueError("Median income cannot be negative")
         return v
 
-    @validator('ZN')
-    def validate_zn(cls, v):
-        if not 0 <= v <= 100:
-            raise ValueError("Residential land proportion must be between 0 and 100")
+    @validator('HouseAge')
+    def validate_age(cls, v):
+        if v < 0:
+            raise ValueError("House age cannot be negative")
         return v
 
-    @validator('NOX')
-    def validate_nox(cls, v):
-        if not 0 <= v <= 1:
-            raise ValueError("NOX concentration must be between 0 and 1")
-        return v
-
-    @validator('RM')
+    @validator('AveRooms', 'AveBedrms')
     def validate_rooms(cls, v):
         if v <= 0:
             raise ValueError("Number of rooms must be positive")
         return v
 
-    @validator('AGE', 'LSTAT')
-    def validate_percentage(cls, v):
-        if not 0 <= v <= 100:
-            raise ValueError("Percentage values must be between 0 and 100")
+    @validator('Population')
+    def validate_population(cls, v):
+        if v < 0:
+            raise ValueError("Population cannot be negative")
+        return v
+
+    @validator('AveOccup')
+    def validate_occupancy(cls, v):
+        if v <= 0:
+            raise ValueError("Average occupancy must be positive")
+        return v
+
+    @validator('Latitude')
+    def validate_latitude(cls, v):
+        if not -90 <= v <= 90:
+            raise ValueError("Latitude must be between -90 and 90")
+        return v
+
+    @validator('Longitude')
+    def validate_longitude(cls, v):
+        if not -180 <= v <= 180:
+            raise ValueError("Longitude must be between -180 and 180")
         return v
 
     class Config:
         schema_extra = {
             "example": {
-                "CRIM": 0.00632,
-                "ZN": 18.0,
-                "INDUS": 2.31,
-                "CHAS": 0,
-                "NOX": 0.538,
-                "RM": 6.575,
-                "AGE": 65.2,
-                "DIS": 4.09,
-                "RAD": 1,
-                "TAX": 296,
-                "PTRATIO": 15.3,
-                "B": 396.9,
-                "LSTAT": 4.98,
-                "Price": 24.0
+                "MedInc": 8.3252,
+                "HouseAge": 41.0,
+                "AveRooms": 6.984127,
+                "AveBedrms": 1.023810,
+                "Population": 322.0,
+                "AveOccup": 2.555556,
+                "Latitude": 37.88,
+                "Longitude": -122.23,
+                "Price": 4.526
             }
         }
 
