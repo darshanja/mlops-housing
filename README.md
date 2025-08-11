@@ -7,7 +7,9 @@ This project demonstrates a full end-to-end MLOps workflow using the California 
 - ⚙️ **FastAPI** for model serving
 - 🐳 **Docker** for containerization
 - 🔁 **GitHub Actions** for CI/CD
-- 🔍 **Logging & Monitoring** with `/metrics` endpoint
+- � **Pydantic** for data validation
+- 📊 **Prometheus & Grafana** for monitoring and visualization
+- �🔍 **Logging & Metrics** with detailed monitoring
 
 ---
 
@@ -20,11 +22,20 @@ mlops-housing/
 ├── logs/                # API logs
 ├── src/                 # Python source code
 │   ├── train.py         # Model training and MLflow logging
-│   └── app.py           # FastAPI inference app
+│   ├── app.py           # FastAPI inference app
+│   ├── prepare_data.py  # Data preparation with validation
+│   ├── validate.py      # Model validation
+│   └── schema.py        # Pydantic schemas for data validation
+├── grafana/             # Grafana dashboards and configuration
+│   ├── dashboards/      # Dashboard JSON definitions
+│   └── provisioning/    # Auto-provisioning configuration
 ├── params.yaml          # Model hyperparameters
 ├── dvc.yaml             # DVC pipeline
 ├── Dockerfile           # Docker container definition
+├── docker-compose.yml   # Multi-container Docker composition
+├── prometheus.yml       # Prometheus configuration
 ├── requirements.txt     # Python dependencies
+├── ARCHITECTURE.md      # Architecture documentation
 ├── .github/workflows/ci-cd.yml  # GitHub Actions CI/CD
 ```
 
@@ -135,23 +146,55 @@ Example payload:
 
 ---
 
-## 📈 Monitor Metrics
+## 📈 Monitoring with Prometheus and Grafana
+
+### View Raw Metrics
 
 Visit: [http://localhost:8000/metrics](http://localhost:8000/metrics)
 
-Output:
+Output includes:
 ```
-predictions_total 5
+# HELP housing_predictions_total Number of predictions made
+# TYPE housing_predictions_total counter
+housing_predictions_total 5
+
+# HELP prediction_duration_seconds Time spent processing prediction
+# TYPE prediction_duration_seconds histogram
+prediction_duration_seconds_bucket{le="0.005"} 3
+...
+
+# HELP model_version Model version
+# TYPE model_version gauge
+model_version 1.0
 ```
+
+### View Dashboards
+
+1. **Prometheus UI**: [http://localhost:9090](http://localhost:9090)
+   - Explore and query raw metrics
+   - Check target status
+   - Execute PromQL queries
+
+2. **Grafana Dashboard**: [http://localhost:3000](http://localhost:3000)
+   - Login with admin/admin
+   - Access the pre-configured "Housing Predictions Dashboard"
+   - View metrics like:
+     - Total predictions
+     - Prediction latency (95th percentile)
+     - Model version
 
 ---
 
-## 🐳 Build and Run Docker Image
+## 🐳 Build and Run with Docker Compose
 
 ```bash
-docker build -t housing-api .
-docker run -p 8000:8000 housing-api
+docker-compose up --build
 ```
+
+This will start:
+1. The FastAPI application on port 8000
+2. Prometheus server on port 9090
+3. Grafana on port 3000 (login: admin/admin)
 
 ---
 
@@ -195,19 +238,26 @@ dvc repro
 
 ## ✅ Summary
 
-| Task                     | Tool Used        |
-|--------------------------|------------------|
-| Data versioning          | DVC              |
-| Code versioning          | Git              |
-| Training                 | Scikit-learn     |
-| Experiment tracking      | MLflow           |
-| Serving                  | FastAPI          |
-| Deployment               | Docker           |
-| Automation               | GitHub Actions   |
-| Monitoring               | Logging + Metrics|
+| Task                     | Tool Used             |
+|--------------------------|----------------------|
+| Data versioning          | DVC                  |
+| Code versioning          | Git                  |
+| Training                 | Scikit-learn         |
+| Experiment tracking      | MLflow               |
+| Data validation          | Pydantic             |
+| Serving                  | FastAPI              |
+| Deployment               | Docker               |
+| Orchestration            | Docker Compose       |
+| Monitoring               | Prometheus           |
+| Visualization            | Grafana              |
+| Automation               | GitHub Actions       |
 
 ---
 
+## 🏛️ Architecture
+
+For a detailed architectural overview, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+
 ## 📬 Questions?
 
-Feel free to reach out or raise an issue if you'd like help deploying this to EC2, Render.com, or adding Prometheus/Grafana dashboards.
+Feel free to reach out or raise an issue if you'd like help deploying this to cloud platforms like EC2 or extending the monitoring capabilities.
