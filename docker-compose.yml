@@ -1,9 +1,11 @@
 services:
   api:
     container_name: housing-api
-    build: 
-      context: .
-      dockerfile: Dockerfile
+    image: darshanjayy/housing-api:latest
+    # Uncomment below to build locally instead of pulling from Docker Hub
+    # build: 
+    #   context: .
+    #   dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
